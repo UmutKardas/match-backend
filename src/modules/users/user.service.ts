@@ -15,4 +15,31 @@ export class UserService {
         await this.userModel.insertMany(users);
         await this.userModel.syncIndexes();
     }
+
+    async findUsersByIdsArray(filteredUserIds: any[], options: { sort: boolean, lean: boolean, exclude?: boolean }) {
+        const filter = options.exclude
+            ? { _id: { $nin: filteredUserIds } }
+            : { _id: { $in: filteredUserIds } };
+
+        let query = this.userModel.find(filter);
+
+        if (options.sort) query.sort({ rank: 1 });
+
+        if (options.lean) query.lean();
+
+        return await query.exec()
+    }
+
+    findUsersByIdsCursor(filteredUserIds: any[], options: { sort: boolean, lean: boolean, exclude?: boolean }) {
+        const filter = options.exclude
+            ? { _id: { $nin: filteredUserIds } }
+            : { _id: { $in: filteredUserIds } };
+
+        let query = this.userModel.find(filter);
+
+        if (options.sort) query.sort({ rank: 1 });
+        if (options.lean) query.lean();
+
+        return query.cursor();
+    }
 }

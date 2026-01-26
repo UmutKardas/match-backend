@@ -28,4 +28,4 @@ export type MatchDocument = Match & Document
 
 export const MatchSchema = SchemaFactory.createForClass(Match)
 
-MatchSchema.index({ scheduleAt: 1, status: 1 })
+MatchSchema.index({ userIds: 1, status: 1 })
