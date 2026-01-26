@@ -1,17 +1,16 @@
 import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { User, UserDocument } from "./user.schema";
-import { Model } from "mongoose";
+import { User } from "./user.schema";
 import { seedConfig } from "src/config/seed.config";
+import { UserService } from "./user.service";
 
 @Injectable()
 export class UserSeed implements OnApplicationBootstrap {
     private readonly logger = new Logger(UserSeed.name);
 
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+    constructor(private readonly userService: UserService) { }
 
     async onApplicationBootstrap() {
-        const currentCount = await this.userModel.countDocuments();
+        const currentCount = await this.userService.fetchTotalUsers();
 
         if (currentCount >= seedConfig.targetUserCount) {
             this.logger.log(`Database already has ${currentCount} users. Skipping seed.`);
@@ -38,14 +37,13 @@ export class UserSeed implements OnApplicationBootstrap {
             })
 
             if (users.length >= seedConfig.batchSize) {
-                await this.userModel.insertMany(users);
+                await this.userService.insertUsersCollection(users)
                 users = [];
             }
-
         }
 
         if (users.length > 0) {
-            await this.userModel.insertMany(users);
+            await this.userService.insertUsersCollection(users)
         }
     }
 }
