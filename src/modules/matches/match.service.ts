@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Match, MatchDocument } from "./match.schema";
-import { Model } from "mongoose";
+import { AnyBulkWriteOperation, Model, } from "mongoose";
 import { MatchStatus } from "src/common/constants/match.constants";
 import { UserService } from "../users/user.service";
+import { matchConfig } from "src/config/match.config";
 
 @Injectable()
 export class MatchService {
@@ -25,5 +26,21 @@ export class MatchService {
             .findOne({ status: MatchStatus.SCHEDULED })
             .sort({ createdAt: -1 })
             .exec();
+    }
+
+    async executeBulkOperations(matchOperations: AnyBulkWriteOperation<MatchDocument>[]) {
+        await this.matchModel.bulkWrite(matchOperations, { ordered: false });
+    }
+
+    findPlayableMatchsCursor() {
+        const now = new Date();
+
+        return this.matchModel
+            .find({
+                status: MatchStatus.SCHEDULED,
+                scheduledAt: { $lte: now }
+            })
+            .lean()
+            .cursor({ batchSize: matchConfig.batchSize });
     }
 }

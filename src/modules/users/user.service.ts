@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "./user.schema";
-import { Model } from "mongoose";
+import { AnyBulkWriteOperation, Model } from "mongoose";
 
 @Injectable()
 export class UserService {
@@ -30,7 +30,11 @@ export class UserService {
         return await query.exec()
     }
 
-    findUsersByIdsCursor(filteredUserIds: any[], options: { sort: boolean, lean: boolean, exclude?: boolean }) {
+    async executeBulkOperations(userOperations: AnyBulkWriteOperation<UserDocument>[]) {
+        await this.userModel.bulkWrite(userOperations, { ordered: false });
+    }
+
+    findUsersByIdsCursor(filteredUserIds: any[], options: { sort: boolean, lean: boolean, batchSize?: number, exclude?: boolean }) {
         const filter = options.exclude
             ? { _id: { $nin: filteredUserIds } }
             : { _id: { $in: filteredUserIds } };
@@ -40,6 +44,6 @@ export class UserService {
         if (options.sort) query.sort({ rank: 1 });
         if (options.lean) query.lean();
 
-        return query.cursor();
+        return query.cursor({ batchSize: options.batchSize ?? 1000 });
     }
 }

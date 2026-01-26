@@ -28,4 +28,5 @@ export type MatchDocument = Match & Document
 
 export const MatchSchema = SchemaFactory.createForClass(Match)
 
-MatchSchema.index({ userIds: 1, status: 1 })
+MatchSchema.index({ status: 1, scheduledAt: 1 });
+MatchSchema.index({ status: 1, createdAt: -1 }); 

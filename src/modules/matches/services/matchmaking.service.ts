@@ -20,11 +20,11 @@ export class MatchmakingService {
         await this.processUsersInBatches(unscheduledUsers, matchConfig.batchSize, matchConfig.groupSize);
     }
 
-    getUnscheduledUsers(schuledUserIds: Types.ObjectId[]) {
-        return this.userService.findUsersByIdsCursor(schuledUserIds, { sort: true, lean: true, exclude: true })
+    private getUnscheduledUsers(schuledUserIds: Types.ObjectId[]) {
+        return this.userService.findUsersByIdsCursor(schuledUserIds, { sort: true, lean: true, batchSize: matchConfig.batchSize, exclude: true })
     }
 
-    async processUsersInBatches(cursor: Cursor<any, any, any>, batchSize: number, groupSize: number) {
+    private async processUsersInBatches(cursor: Cursor<any, any, any>, batchSize: number, groupSize: number) {
         let batch: UserDocument[] = [];
 
         for await (const user of cursor) {
@@ -41,7 +41,7 @@ export class MatchmakingService {
         }
     }
 
-    createGroups(users: UserDocument[], groupSize: number): UserGroup[] {
+    private createGroups(users: UserDocument[], groupSize: number): UserGroup[] {
         const groups: UserGroup[] = [];
         for (let i = 0; i < users.length; i += groupSize) {
             groups.push({ users: users.slice(i, i + groupSize) });
@@ -49,7 +49,7 @@ export class MatchmakingService {
         return groups;
     }
 
-    async saveMatches(groups: UserGroup[]) {
+    private async saveMatches(groups: UserGroup[]) {
         const matches: Partial<Match>[] = []
         const matchTime = this.fetchMatchTime();
 
@@ -63,7 +63,7 @@ export class MatchmakingService {
         await this.matchService.addMultipleMatches(matches);
     }
 
-    async allocateUsersToMatchGroup(batch: UserDocument[], groupSize: number) {
+    private async allocateUsersToMatchGroup(batch: UserDocument[], groupSize: number) {
         let lastGroup = await this.matchService.getLastScheduledMatch();
 
 
@@ -81,7 +81,7 @@ export class MatchmakingService {
         }
     }
 
-    fetchMatchTime() {
+    private fetchMatchTime() {
         const now = new Date();
 
         const matchDate = new Date(Date.UTC(

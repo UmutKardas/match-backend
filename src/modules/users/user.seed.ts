@@ -32,8 +32,6 @@ export class UserSeed implements OnApplicationBootstrap {
         for (let i = 0; i < count; i++) {
             users.push({
                 rank: Math.ceil(Math.random() * seedConfig.maxRank),
-                winCount: 0,
-                loseCount: 0
             })
 
             if (users.length >= seedConfig.batchSize) {

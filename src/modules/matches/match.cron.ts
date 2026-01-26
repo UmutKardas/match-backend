@@ -13,7 +13,7 @@ export class MatchCron {
         private readonly matchSimulationService: MatchSimulationService
     ) { }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_HOUR)
     async runMatchmaking() {
         try {
             this.logger.log('Starting matchmaking cron job');
