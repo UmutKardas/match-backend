@@ -13,5 +13,6 @@ export class UserService {
 
     async insertUsersCollection(users: Partial<User>[]) {
         await this.userModel.insertMany(users);
+        await this.userModel.syncIndexes();
     }
 }

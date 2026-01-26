@@ -8,7 +8,7 @@ import { Document } from 'mongoose';
     }
 })
 export class User {
-    @Prop({ required: true, index: true })
+    @Prop({ required: true })
     rank: number;
 
     @Prop({ default: 0 })
@@ -20,3 +20,5 @@ export class User {
 
 export type UserDocument = User & Document;
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({ rank: 1 })
