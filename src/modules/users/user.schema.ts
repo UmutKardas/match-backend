@@ -1,7 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({
+    timestamps: {
+        createdAt: true,
+        updatedAt: true
+    }
+})
 export class User {
     @Prop({ required: true, index: true })
     rank: number;
