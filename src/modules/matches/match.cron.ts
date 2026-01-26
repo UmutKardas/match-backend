@@ -1,19 +1,23 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { env } from "src/config/env";
-import { MatchService } from "./match.service";
+import { MatchmakingService } from "./services/matchmaking.service";
+import { MatchSimulationService } from "./services/match-simulation.service";
 
 @Injectable()
 export class MatchCron {
     private readonly logger = new Logger(MatchCron.name)
 
-    constructor(private readonly matchService: MatchService) { }
+    constructor(
+        private readonly matchmakingService: MatchmakingService,
+        private readonly matchSimulationService: MatchSimulationService
+    ) { }
 
     @Cron(CronExpression.EVERY_MINUTE)
     async runMatchmaking() {
         try {
             this.logger.log('Starting matchmaking cron job');
-            await this.matchService.runMatchmaking();
+            await this.matchmakingService.runMatchmaking();
             this.logger.log('Finished matchmaking cron job');
         } catch (error) {
             this.logger.error('Error during matchmaking cron job:', error);
@@ -24,7 +28,7 @@ export class MatchCron {
     async playMatches() {
         try {
             this.logger.log('Starting match simulation cron job');
-            await this.matchService.runMatchSimulation();
+            await this.matchSimulationService.runMatchSimulation();
             this.logger.log('Finished match simulation cron job');
         } catch (error) {
             this.logger.error('Error during match simulation cron job:', error);
