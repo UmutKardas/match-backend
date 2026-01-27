@@ -23,7 +23,7 @@ export class LeaderboardService {
     }
 
     async rebuildAndResponseByMode(userId: string, mode: LeaderboardMode): Promise<LeaderboardResponseDto> {
-        const cursor = this.userService.findUsersByIdsCursor([], { sort: false, lean: true, batchSize: leaderboardConfig.batchSize })
+        const cursor = this.userService.findUsersByIdsCursor([], { sort: false, lean: true, batchSize: leaderboardConfig.batchSize, exclude: true })
         let batch: UserDocument[] = [];
 
         for await (const user of cursor) {
@@ -35,7 +35,7 @@ export class LeaderboardService {
             }
         }
 
-        if (batch.length === leaderboardConfig.batchSize) {
+        if (batch.length > 0) {
             await this.leaderboardRedisService.addUserInPipeline(batch)
         }
 
@@ -44,7 +44,7 @@ export class LeaderboardService {
 
     async getLeaderboardByMode(userId: string, mode: LeaderboardMode): Promise<LeaderboardResponseDto> {
         const data = mode === LeaderboardMode.TOP100 ? await this.leaderboardRedisService.fetchTopPlayers() : await this.leaderboardRedisService.getAround(userId);
-        const mappedLeaderboardData = await LeaderboardMapper.toResponseDto(data);
+        const mappedLeaderboardData = LeaderboardMapper.toResponseDto(data);
         return mappedLeaderboardData;
     }
 }
