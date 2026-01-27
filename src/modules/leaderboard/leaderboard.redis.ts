@@ -3,6 +3,7 @@ import { AROUND_SIZE, LEADERBOARD_GLOBAL_KEY } from "src/common/constants/leader
 import { RedisService } from "src/infra/redis/redis.service";
 import { UserDocument } from "../users/user.schema";
 import { leaderboardConfig } from "src/config/leaderboard.config";
+import { AppException } from "src/common/exceptions/app.exception";
 
 @Injectable()
 export class LeaderboardRedisService {
@@ -47,7 +48,7 @@ export class LeaderboardRedisService {
         const rank = await this.redisService.redis.zrevrank(LEADERBOARD_GLOBAL_KEY, userId);
 
         if (rank == null) {
-            return [];
+            throw new AppException(`User with ID ${userId} not found in leaderboard`);
         }
 
         const minValue = Math.max(0, rank - AROUND_SIZE);
