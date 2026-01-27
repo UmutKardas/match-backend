@@ -6,7 +6,7 @@ import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { RedisModule } from './infra/redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { ApiExceptionFilter } from './common/filter/api.exception.filter';
 
 @Module({
