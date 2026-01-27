@@ -1,14 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import Redis from "ioredis";
 import { env } from "src/config/env";
 
 @Injectable()
-export class RedisService extends Redis {
+export class RedisService implements OnModuleDestroy {
+    private readonly client: Redis
+
     constructor() {
-        super({
+        this.client = new Redis({
             host: env.REDIS_HOST,
+            port: env.REDIS_PORT,
             password: env.REDIS_PASSWORD,
-            port: env.REDIS_PORT
+            maxRetriesPerRequest: null,
+            enableReadyCheck: true
         })
+    }
+
+    get redis(): Redis {
+        return this.client;
+    }
+
+    onModuleDestroy() {
+        this.client.quit();
     }
 }

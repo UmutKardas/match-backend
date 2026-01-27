@@ -6,12 +6,14 @@ import { UserService } from "src/modules/users/user.service";
 import { matchConfig } from "src/config/match.config";
 import { MatchStatus } from "src/common/constants/match.constants";
 import { UserDocument } from "src/modules/users/user.schema";
+import { LeaderboardRedisService } from "src/modules/leaderboard/leaderboard.redis";
 
 @Injectable()
 export class MatchSimulationService {
     constructor(
         private readonly matchService: MatchService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly leaderboardRedisService: LeaderboardRedisService
     ) { }
 
     async runMatchSimulation() {
@@ -40,19 +42,21 @@ export class MatchSimulationService {
         let matchBulkActions: AnyBulkWriteOperation<MatchDocument>[] = [];
         let userWinningOperations: AnyBulkWriteOperation<UserDocument>[] = [];
         let userLossOperations: AnyBulkWriteOperation<UserDocument>[] = [];
+        let matchWinners: string[] = [];
 
         for (const match of matches) {
             const { winnerId, loserIds } = this.selectRandomWinner(match.userIds);
             matchBulkActions.push(this.buildMatchUpdate(match, winnerId, loserIds));
             userWinningOperations.push(this.buildWinUpdate(winnerId));
             userLossOperations.push(...loserIds.map(x => this.buildLoseUpdate(x)))
+            matchWinners.push(winnerId.toString())
         }
 
         await Promise.all([
             this.matchService.executeBulkOperations(matchBulkActions),
-            this.userService.executeBulkOperations(userWinningOperations.concat(userLossOperations))
-
-        ])
+            this.userService.executeBulkOperations(userWinningOperations.concat(userLossOperations)),
+            this.leaderboardRedisService.updateUserScoresInPipeline(matchWinners)
+        ]);
 
     }
 

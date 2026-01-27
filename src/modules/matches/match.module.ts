@@ -6,9 +6,10 @@ import { MatchCron } from "./match.cron";
 import { UserModule } from "../users/user.module";
 import { MatchmakingService } from "./services/matchmaking.service";
 import { MatchSimulationService } from "./services/match-simulation.service";
+import { LeaderboardModule } from "../leaderboard/leaderboard.module";
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Match.name, schema: MatchSchema }]), UserModule],
+    imports: [MongooseModule.forFeature([{ name: Match.name, schema: MatchSchema }]), UserModule, LeaderboardModule],
     providers: [MatchService, MatchmakingService, MatchSimulationService, MatchCron],
     exports: []
 })
