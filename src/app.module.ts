@@ -8,9 +8,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { ApiExceptionFilter } from './common/filter/api.exception.filter';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
-  imports: [MongoModule, RedisModule, UserModule, MatchModule, LeaderboardModule, ScheduleModule.forRoot()],
+  imports: [MongoModule, RedisModule, UserModule, MatchModule, LeaderboardModule, ScheduleModule.forRoot(), LoggerModule.forRoot()],
   providers: [
     {
       provide: APP_INTERCEPTOR,

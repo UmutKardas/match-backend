@@ -1,26 +1,30 @@
-import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { User } from "./user.schema";
 import { seedConfig } from "src/config/seed.config";
 import { UserService } from "./user.service";
+import { PinoLogger, InjectPinoLogger } from "nestjs-pino";
 
 @Injectable()
 export class UserSeed implements OnApplicationBootstrap {
-    private readonly logger = new Logger(UserSeed.name);
 
-    constructor(private readonly userService: UserService) { }
+    constructor(
+        private readonly userService: UserService,
+        @InjectPinoLogger(UserSeed.name)
+        private readonly logger: PinoLogger
+    ) { }
 
     async onApplicationBootstrap() {
         const currentCount = await this.userService.fetchTotalUsers();
 
         if (currentCount >= seedConfig.targetUserCount) {
-            this.logger.log(`Database already has ${currentCount} users. Skipping seed.`);
+            this.logger.info(`Database already has ${currentCount} users. Skipping seed.`);
             return;
         }
 
         try {
-            this.logger.log('Seeding Users...')
+            this.logger.info('Seeding Users...')
             await this.seedUsers(seedConfig.targetUserCount - currentCount)
-            this.logger.log('Seed Completed')
+            this.logger.info('Seed Completed')
         } catch (error) {
             this.logger.error('Error during seeding users:', error);
         }
